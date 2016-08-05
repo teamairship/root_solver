@@ -38,7 +38,7 @@ RootSolver::BisectionNewton.new(f, 0, high, tol).solve
 => 3.1622813514478687
 
 # If there are multiple roots between low and high, root_solver will find one
-RootSolver::BisectionNewton.new(f, low, high tol).solve
+RootSolver::BisectionNewton.new(f, low, high, tol).solve
 => 3.1622813514478687
 ```
 
@@ -50,5 +50,5 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/root_solver.
+Bug reports and pull requests are welcome on GitHub at https://github.com/teamairship/root_solver.
 
