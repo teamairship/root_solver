@@ -8,6 +8,7 @@ module RootSolver
       @tol = tol
       @n   = n
       @eps = eps
+      epsilon_constraint
     end
 
     def solve(f = @f, x0 = @x0, tol = @tol, n = @n, eps = @eps)
@@ -25,6 +26,19 @@ module RootSolver
       else
         solve(f, x, tol, n - 1, eps)
       end
+    end
+
+    private
+    def epsilon_constraint
+      @eps = domain_step if eps_relatively_large? && !domain_step.zero?
+    end
+
+    def domain_step
+      @x0 * 0.01
+    end
+
+    def eps_relatively_large?
+      @eps > domain_step.abs
     end
 
   end
@@ -73,7 +87,7 @@ module RootSolver
   end
 
   class BisectionNewton
-    def initialize(f, low, high, tol = 0.1, n = 5)
+    def initialize(f, low, high, tol = 0.01, n = 5)
       @f    = f
       @tol  = tol
       @n    = n
