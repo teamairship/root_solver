@@ -39,17 +39,33 @@ module RootSolver
     end
 
     def solve(f = @f, low = @low, high = @high, tol = @tol, n = @n)
+     presolve(f, low, high, tol, n)
+    end
+
+    private
+
+    def presolve(f, low, high, tol, n)
+      if f.call(high)  == 0
+        high
+      elsif f.call(low) == 0
+        low
+      else
+        bisection(f, low, high, tol, n)
+      end
+    end
+
+    def bisection(f, low, high, tol, n)
       x = (high + low) / 2
       y = f.call(x)
 
-      if y.abs < tol #successfully found root
+      if y.abs < tol #
         x
-      elsif n <= 0 #break out of solver after so many iterations
+      elsif !crossing?(f, low, high)
+        raise NonCrossingError.new("low: #{low} high: #{high}")
+      elsif x_converge?(low, high, tol) || n <= 0
         x
-      elsif x_converge?(low, high, tol) && !crossing?(f, low, high)
-        raise NoRootError.new
       else #narrow window of searching by half
-        if y > 0
+        if crossing?(f, low, x)
           high = x
         else
           low = x
@@ -57,8 +73,6 @@ module RootSolver
         solve(f, low, high, tol, n - 1)
       end
     end
-
-    private
 
     #root is between the high and low
     def crossing?(f, low, high)
@@ -92,6 +106,12 @@ module RootSolver
 
   class NoRootError < Error
     def initialize(msg = "Root not found.")
+      super
+    end
+  end
+
+  class NonCrossingError < Error
+    def initialize(msg = "Bisection method requires high and low where f(high) and f(low) have opposite signs")
       super
     end
   end
