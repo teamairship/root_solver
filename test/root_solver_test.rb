@@ -20,6 +20,11 @@ class RootSolverTest < Minitest::Test
     assert_in_delta 0, @bisection.new(one_rooted_function, -10, 10, 1e-3).solve, 1e-3
   end
 
+  def test_finds_root_of_shifted_one_rooted_function
+    assert_in_delta 1, @bisection_newton.new(shifted_one_rooted_function, 0, 3, 1e-3).solve, 1e-3
+    assert_in_delta 1, @bisection.new(shifted_one_rooted_function, 0, 3, 1e-3).solve, 1e-3
+  end
+
   def test_finds_root_of_two_rooted_function
     bn_solution = @bisection_newton.new(two_rooted_function, 0, 10, 1e-3).solve
     b_solution = @bisection.new(two_rooted_function, 0, 10, 1e-3).solve
@@ -52,6 +57,10 @@ class RootSolverTest < Minitest::Test
   private
     def one_rooted_function
       Proc.new { |x| x ** 2 }
+    end
+
+    def shifted_one_rooted_function
+      Proc.new { |x| (x - 1) ** 2 }
     end
 
     def two_rooted_function
