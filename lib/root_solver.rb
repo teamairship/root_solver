@@ -2,7 +2,7 @@ require "root_solver/version"
 
 module RootSolver
   class Newton
-    def initialize(f, x0 = 0, tol = 0.01, n = 10, eps = 0.001)
+    def initialize(f, x0 = 0, tol = 0.01, n = 15, eps = 0.001)
       @f   = f
       @x0  = x0
       @tol = tol
@@ -14,7 +14,7 @@ module RootSolver
       y0 = f.call(x0)
       y_prime = (f.call(x0 + eps) - y0) / eps
 
-      raise NonconvergenceError.new if y_prime.abs < tol
+      raise NonconvergenceError.new if y_prime.abs < tol && y0.abs > tol 
 
       x = x0 - y0 / y_prime
       y = f.call(x)
@@ -39,17 +39,33 @@ module RootSolver
     end
 
     def solve(f = @f, low = @low, high = @high, tol = @tol, n = @n)
+     presolve(f, low, high, tol, n)
+    end
+
+    private
+
+    def presolve(f, low, high, tol, n)
+      if f.call(high)  == 0
+        high
+      elsif f.call(low) == 0
+        low
+      else
+        bisection(f, low, high, tol, n)
+      end
+    end
+
+    def bisection(f, low, high, tol, n)
       x = (high + low) / 2
       y = f.call(x)
 
-      if y.abs < tol #successfully found root
+      if y.abs < tol #
         x
-      elsif n <= 0 #break out of solver after so many iterations
+      elsif !crossing?(f, low, high)
+        raise NonCrossingError.new("low: #{low} high: #{high}")
+      elsif x_converge?(low, high, tol) || n <= 0
         x
-      elsif x_converge?(low, high, tol) && !crossing?(f, low, high)
-        raise NoRootError.new
       else #narrow window of searching by half
-        if y > 0
+        if crossing?(f, low, x)
           high = x
         else
           low = x
@@ -57,8 +73,6 @@ module RootSolver
         solve(f, low, high, tol, n - 1)
       end
     end
-
-    private
 
     #root is between the high and low
     def crossing?(f, low, high)
@@ -82,8 +96,12 @@ module RootSolver
     end
 
     def solve
-      x1 = RootSolver::Bisection.new(@f, @low, @high, @tol, @n).solve
-      RootSolver::Newton.new(@f, x1, @tol).solve
+      begin
+        x1 = RootSolver::Bisection.new(@f, @low, @high, @tol, @n).solve
+        RootSolver::Newton.new(@f, x1, @tol).solve
+      rescue NonCrossingError
+        RootSolver::Newton.new(@f, (@low + @high)/2, @tol).solve
+      end
     end
   end
 
@@ -92,6 +110,12 @@ module RootSolver
 
   class NoRootError < Error
     def initialize(msg = "Root not found.")
+      super
+    end
+  end
+
+  class NonCrossingError < Error
+    def initialize(msg = "Bisection method requires high and low where f(high) and f(low) have opposite signs")
       super
     end
   end
