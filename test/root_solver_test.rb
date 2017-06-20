@@ -28,18 +28,19 @@ class RootSolverTest < Minitest::Test
     assert_in_delta 0, two_rooted_function.call(b_solution), 1e-3
   end
 
-  def test_raises_for_non_crossing_high_low
-    assert_raises RootSolver::NonCrossingError do
-      @bisection_newton.new(two_rooted_function, 10, 10, 1e-3).solve
-    end
+  def test_bisection_newton_solves_for_non_crossing_high_low
+    bn_solution = @bisection_newton.new(two_rooted_function, 10, 10, 1e-3).solve
+    assert_in_delta 0, two_rooted_function.call(bn_solution), 1e-3
+  end
 
+  def test_raises_for_non_crossing_high_low
     assert_raises RootSolver::NonCrossingError do
       @bisection.new(two_rooted_function, 10, 10, 1e-3).solve
     end
   end
 
   def test_raises_for_a_non_rooted_function
-    assert_raises RootSolver::NonCrossingError do
+    assert_raises RootSolver::NonconvergenceError do
       3.times { puts @bisection_newton.new(non_rooted_function, -100, 100, 1e-3, 50).solve }
     end
 

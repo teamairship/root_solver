@@ -96,8 +96,12 @@ module RootSolver
     end
 
     def solve
-      x1 = RootSolver::Bisection.new(@f, @low, @high, @tol, @n).solve
-      RootSolver::Newton.new(@f, x1, @tol).solve
+      begin
+        x1 = RootSolver::Bisection.new(@f, @low, @high, @tol, @n).solve
+        RootSolver::Newton.new(@f, x1, @tol).solve
+      rescue NonCrossingError
+        RootSolver::Newton.new(@f, (@low + @high)/2, @tol).solve
+      end
     end
   end
 
