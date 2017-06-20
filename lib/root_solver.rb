@@ -2,7 +2,7 @@ require "root_solver/version"
 
 module RootSolver
   class Newton
-    def initialize(f, x0 = 0, tol = 0.01, n = 10, eps = 0.001)
+    def initialize(f, x0 = 0, tol = 0.01, n = 15, eps = 0.001)
       @f   = f
       @x0  = x0
       @tol = tol
@@ -14,7 +14,7 @@ module RootSolver
       y0 = f.call(x0)
       y_prime = (f.call(x0 + eps) - y0) / eps
 
-      raise NonconvergenceError.new if y_prime.abs < tol
+      raise NonconvergenceError.new if y_prime.abs < tol && y0.abs > tol 
 
       x = x0 - y0 / y_prime
       y = f.call(x)

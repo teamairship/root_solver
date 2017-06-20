@@ -34,13 +34,13 @@ class RootSolverTest < Minitest::Test
   end
 
   def test_bisection_newton_solves_for_non_crossing_high_low
-    bn_solution = @bisection_newton.new(two_rooted_function, 10, 10, 1e-3).solve
+    bn_solution = @bisection_newton.new(two_rooted_function, -10, 10, 1e-3).solve
     assert_in_delta 0, two_rooted_function.call(bn_solution), 1e-3
   end
 
   def test_raises_for_non_crossing_high_low
     assert_raises RootSolver::NonCrossingError do
-      @bisection.new(two_rooted_function, 10, 10, 1e-3).solve
+      @bisection.new(two_rooted_function, -10, 10, 1e-3).solve
     end
   end
 
